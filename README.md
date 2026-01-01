@@ -103,9 +103,9 @@ git commit -m "Initial Next.js setup with polished User Profile and Task Managem
 
 #### Developer 1: Enhance User Profile
 ```bash
-cd ../git-worktree-demo
 git branch feature/test-one
 git worktree add ../test-one-worktree feature/test-one
+cd ../test-one-worktree
 
 # Example enhancement: Add a bio field
 # Edit src/app/test-one/page.tsx and add a bio section...
@@ -116,10 +116,9 @@ git commit -m "Add bio field and location to user profile"
 
 #### Developer 2: Enhance Task Management
 ```bash
-cd ../git-worktree-demo  # back to main
 git branch feature/test-two
 git worktree add ../test-two-worktree feature/test-two
-
+cd ../test-two-worktree
 # Example enhancement: Add "Clear completed" button or filters...
 
 git add .
