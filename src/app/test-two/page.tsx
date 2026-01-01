@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Trash2, Plus } from 'lucide-react';
+import TaskItem from '../../components/TaskItem';
 
 type Task = {
     id: number;
@@ -10,25 +10,39 @@ type Task = {
     priority: 'Low' | 'Medium' | 'High';
 };
 
+type FilterType = 'all' | 'active' | 'completed';
+type SortType = 'priority' | 'created' | 'alphabetical';
+
 export default function TestTwo() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [newTask, setNewTask] = useState('');
     const [priority, setPriority] = useState<'Low' | 'Medium' | 'High'>('Medium');
+    const [filter, setFilter] = useState<FilterType>('all');
+    const [sort, setSort] = useState<SortType>('created');
 
     // Load from localStorage on mount
     useEffect(() => {
         const saved = localStorage.getItem('tasks');
-        if (saved) setTasks(JSON.parse(saved));
+        if (saved) {
+            try {
+                setTasks(JSON.parse(saved));
+            } catch (error) {
+                console.error('Failed to load tasks:', error);
+                localStorage.removeItem('tasks');
+            }
+        }
     }, []);
 
     // Save to localStorage on change
     useEffect(() => {
-        localStorage.setItem('tasks', JSON.stringify(tasks));
+        if (tasks.length > 0) {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
     }, [tasks]);
 
     const addTask = () => {
         if (newTask.trim()) {
-            setTasks([...tasks, { id: Date.now(), text: newTask, completed: false, priority }]);
+            setTasks([...tasks, { id: Date.now(), text: newTask.trim(), completed: false, priority }]);
             setNewTask('');
         }
     };
@@ -41,74 +55,172 @@ export default function TestTwo() {
         setTasks(tasks.filter(t => t.id !== id));
     };
 
-    const getPriorityColor = (p: string) => {
-        switch (p) {
-            case 'High': return 'bg-red-100 text-red-800';
-            case 'Medium': return 'bg-yellow-100 text-yellow-800';
-            default: return 'bg-green-100 text-green-800';
+    const editTask = (id: number, text: string) => {
+        setTasks(tasks.map(t => t.id === id ? { ...t, text } : t));
+    };
+
+    const clearCompleted = () => {
+        setTasks(tasks.filter(t => !t.completed));
+    };
+
+    const filteredTasks = tasks.filter(task => {
+        if (filter === 'active') return !task.completed;
+        if (filter === 'completed') return task.completed;
+        return true;
+    });
+
+    const sortedTasks = [...filteredTasks].sort((a, b) => {
+        if (sort === 'priority') {
+            const priorityOrder = { High: 3, Medium: 2, Low: 1 };
+            return priorityOrder[b.priority] - priorityOrder[a.priority];
         }
+        if (sort === 'alphabetical') {
+            return a.text.localeCompare(b.text);
+        }
+        return b.id - a.id; // created (newest first)
+    });
+
+    const stats = {
+        total: tasks.length,
+        completed: tasks.filter(t => t.completed).length,
+        active: tasks.filter(t => !t.completed).length
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4">
-            <div className="max-w-2xl mx-auto">
-                <h1 className="text-4xl font-bold text-center mb-8">Task Management</h1>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-6 px-4">
+            <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-8">
+                    <h1 className="text-4xl font-bold text-gray-800 mb-2">Task Manager</h1>
+                    <div className="flex justify-center gap-6 text-sm text-gray-600">
+                        <span>Total: {stats.total}</span>
+                        <span>Active: {stats.active}</span>
+                        <span>Completed: {stats.completed}</span>
+                    </div>
+                </div>
 
-                <div className="bg-white rounded-xl shadow-lg p-8">
-                    <div className="flex gap-4 mb-8">
+                <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    {/* Add Task Form */}
+                    <div className="flex flex-col sm:flex-row gap-3 mb-6">
                         <input
                             type="text"
                             value={newTask}
                             onChange={(e) => setNewTask(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && addTask()}
-                            placeholder="Add a new task..."
-                            className="flex-1 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="What needs to be done?"
+                            className="flex-1 px-4 py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
+                            style={{ color: '#1f2937', backgroundColor: '#ffffff' }}
                         />
                         <select
                             value={priority}
                             onChange={(e) => setPriority(e.target.value as any)}
-                            className="px-4 py-3 border rounded-lg"
+                            className="px-4 py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            style={{ color: '#1f2937', backgroundColor: '#ffffff' }}
                         >
-                            <option>Low</option>
-                            <option>Medium</option>
-                            <option>High</option>
+                            <option value="Low" style={{ color: '#1f2937' }}>🟢 Low Priority</option>
+                            <option value="Medium" style={{ color: '#1f2937' }}>🟡 Medium Priority</option>
+                            <option value="High" style={{ color: '#1f2937' }}>🔴 High Priority</option>
                         </select>
                         <button
                             onClick={addTask}
-                            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+                            disabled={!newTask.trim()}
+                            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 min-w-[120px] shadow-md"
                         >
-                            <Plus className="w-5 h-5" /> Add
+                            ➕ Add Task
                         </button>
                     </div>
 
-                    <ul className="space-y-4">
-                        {tasks.map(task => (
-                            <li key={task.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
-                                <input
-                                    type="checkbox"
-                                    checked={task.completed}
-                                    onChange={() => toggleTask(task.id)}
-                                    className="w-6 h-6"
-                                />
-                                <span className={`flex-1 ${task.completed ? 'line-through text-gray-500' : ''}`}>
-                  {task.text}
-                </span>
-                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(task.priority)}`}>
-                  {task.priority}
-                </span>
+                    {/* Filters and Controls */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 p-4 bg-gray-100 rounded-lg border">
+                        <div className="flex flex-wrap gap-2">
+                            <button
+                                onClick={() => setFilter('all')}
+                                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
+                                    filter === 'all' 
+                                        ? 'bg-blue-600 text-white shadow-md' 
+                                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                                }`}
+                            >
+                                📋 All ({stats.total})
+                            </button>
+                            <button
+                                onClick={() => setFilter('active')}
+                                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
+                                    filter === 'active' 
+                                        ? 'bg-blue-600 text-white shadow-md' 
+                                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                                }`}
+                            >
+                                ⏳ Active ({stats.active})
+                            </button>
+                            <button
+                                onClick={() => setFilter('completed')}
+                                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
+                                    filter === 'completed' 
+                                        ? 'bg-blue-600 text-white shadow-md' 
+                                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                                }`}
+                            >
+                                ✅ Done ({stats.completed})
+                            </button>
+                        </div>
+                        
+                        <div className="flex gap-2 items-center">
+                            <select
+                                value={sort}
+                                onChange={(e) => setSort(e.target.value as SortType)}
+                                className="px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                                style={{ color: '#1f2937', backgroundColor: '#ffffff' }}
+                            >
+                                <option value="created" style={{ color: '#1f2937' }}>📅 Sort by Created</option>
+                                <option value="priority" style={{ color: '#1f2937' }}>⭐ Sort by Priority</option>
+                                <option value="alphabetical" style={{ color: '#1f2937' }}>🔤 Sort A-Z</option>
+                            </select>
+                            
+                            {stats.completed > 0 && (
                                 <button
-                                    onClick={() => deleteTask(task.id)}
-                                    className="text-red-500 hover:text-red-700"
+                                    onClick={clearCompleted}
+                                    className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 text-sm transition-all shadow-md"
                                 >
-                                    <Trash2 className="w-5 h-5" />
+                                    🗑️ Clear Done
                                 </button>
-                            </li>
-                        ))}
-                    </ul>
+                            )}
+                        </div>
+                    </div>
 
-                    {tasks.length === 0 && (
-                        <p className="text-center text-gray-500 py-8">No tasks yet. Add one above!</p>
+                    {/* Tasks List */}
+                    {sortedTasks.length > 0 ? (
+                        <ul className="space-y-3">
+                            {sortedTasks.map(task => (
+                                <TaskItem
+                                    key={task.id}
+                                    task={task}
+                                    onToggle={toggleTask}
+                                    onDelete={deleteTask}
+                                    onEdit={editTask}
+                                />
+                            ))}
+                        </ul>
+                    ) : (
+                        <div className="text-center py-12">
+                            <div className="text-6xl mb-4">📝</div>
+                            <p className="text-gray-700 text-lg font-medium">
+                                {filter === 'all' ? 'No tasks yet. Add one above!' :
+                                 filter === 'active' ? 'No active tasks!' :
+                                 'No completed tasks!'}
+                            </p>
+                        </div>
                     )}
+                </div>
+
+                {/* Keyboard Shortcuts Help */}
+                <div className="bg-white rounded-lg shadow-md border p-4 text-sm">
+                    <p className="font-bold mb-2 text-gray-800">💡 Quick Tips:</p>
+                    <ul className="space-y-1 text-gray-700">
+                        <li>• Press <kbd className="px-2 py-1 bg-gray-200 rounded text-xs font-mono">Enter</kbd> to add a task</li>
+                        <li>• Click on task text to edit</li>
+                        <li>• Press <kbd className="px-2 py-1 bg-gray-200 rounded text-xs font-mono">Enter</kbd> to save, <kbd className="px-2 py-1 bg-gray-200 rounded text-xs font-mono">Escape</kbd> to cancel</li>
+                        <li>• Click delete twice to confirm removal</li>
+                    </ul>
                 </div>
             </div>
         </div>
