@@ -1,36 +1,148 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js Git Worktree Demo Project
 
-## Getting Started
+A professional mock Next.js application designed to demonstrate the power of **Git worktrees** for parallel, conflict-free development on isolated features.
 
-First, run the development server:
+This repository simulates a real-world scenario where two developers work simultaneously on separate modules of a dashboard application:
+- **Test One**: A fully interactive User Profile module
+- **Test Two**: A feature-rich Task Management (Todo) module
 
+Since each module lives in its own isolated folder (`src/app/test-one` and `src/app/test-two`), changes never overlap — perfect for showcasing clean merges using Git worktrees.
+
+## Features Demonstrated
+
+- Modern Next.js 14+ with App Router, TypeScript, Tailwind CSS, and ESLint
+- Client-side interactivity with React hooks
+- Polished UI using Tailwind and Lucide icons
+- Isolated feature directories to enable conflict-free parallel development
+- Realistic dashboard modules that look like production-ready components
+
+### Module 1: User Profile (`/test-one`)
+- Editable name and email
+- Avatar with initial
+- Stats cards (Posts, Followers, Likes)
+- Dark mode toggle
+- Responsive and modern design
+
+### Module 2: Task Management (`/test-two`)
+- Add tasks with priority (Low/Medium/High)
+- Mark complete with checkbox (strikethrough effect)
+- Delete tasks
+- Priority badges with color coding
+- Persistence using localStorage
+- Clean, empty state handling
+
+## How to Set Up and Run the Demo
+
+### 1. Initial Setup (Main Repository)
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npx create-next-app@latest . --typescript --eslint --tailwind --src-dir --app --import-alias "@/*"
+# Accept defaults or choose as preferred
+
+# Install Lucide icons (required for UI)
+npm install lucide-react
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Update Home Page (`src/app/page.tsx`)
+Replace with navigation links:
+```tsx
+import Link from 'next/link';
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+export default function Home() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <h1 className="text-4xl font-bold mb-8">Next.js Git Worktree Demo</h1>
+      <div className="space-x-6">
+        <Link href="/test-one" className="px-6 py-3 bg-blue-600 text-white text-lg rounded-lg hover:bg-blue-700">
+          User Profile Module
+        </Link>
+        <Link href="/test-two" className="px-6 py-3 bg-green-600 text-white text-lg rounded-lg hover:bg-green-700">
+          Task Management Module
+        </Link>
+      </div>
+    </div>
+  );
+}
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Add the Two Modules
 
-## Learn More
+#### `src/app/test-one/page.tsx`
+```tsx
+'use client';
 
-To learn more about Next.js, take a look at the following resources:
+import { useState } from 'react';
+import { User, Mail, Posts, Heart, Moon, Sun } from 'lucide-react';
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+export default function TestOne() {
+  const [name, setName] = useState('John Doe');
+  const [email, setEmail] = useState('john@example.com');
+  const [isEditing, setIsEditing] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+  // ... (full code from previous message - User Profile component)
+}
+```
 
-## Deploy on Vercel
+#### `src/app/test-two/page.tsx`
+```tsx
+'use client';
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+import { useState, useEffect } from 'react';
+import { Trash2, Plus } from 'lucide-react';
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+// ... (full code from previous message - Task Management component)
+```
+
+### 4. Commit Initial State
+```bash
+git add .
+git commit -m "Initial Next.js setup with polished User Profile and Task Management modules"
+```
+
+### 5. Demonstrate Git Worktrees
+
+#### Developer 1: Enhance User Profile
+```bash
+cd ../git-worktree-demo
+git branch feature/test-one
+git worktree add ../test-one-worktree feature/test-one
+
+# Example enhancement: Add a bio field
+# Edit src/app/test-one/page.tsx and add a bio section...
+
+git add .
+git commit -m "Add bio field and location to user profile"
+```
+
+#### Developer 2: Enhance Task Management
+```bash
+cd ../git-worktree-demo  # back to main
+git branch feature/test-two
+git worktree add ../test-two-worktree feature/test-two
+
+# Example enhancement: Add "Clear completed" button or filters...
+
+git add .
+git commit -m "Add filter tabs and clear completed functionality"
+```
+
+### 6. Merge Without Conflicts
+```bash
+cd ../git-worktree-demo
+git checkout main
+git merge feature/test-one
+git merge feature/test-two
+# No merge conflicts! Both features integrate seamlessly.
+```
+
+### 7. Run the App
+```bash
+npm run dev
+```
+Visit `http://localhost:3000` → Click links to see both enhanced modules working together.
+
+### 8. Cleanup (Optional)
+```bash
+git worktree remove ../test-one-worktree
+git worktree remove ../test-two-worktree
+git branch -d feature/test-one feature/test-two
