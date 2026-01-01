@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Mail, Posts, Heart, Moon, Sun } from 'lucide-react';
+import { User, Mail, Ghost, Heart, Moon, Sun } from 'lucide-react';
 
 export default function TestOne() {
     const [name, setName] = useState('John Doe');
@@ -59,7 +59,7 @@ export default function TestOne() {
 
                     <div className="grid grid-cols-3 gap-6">
                         <div className="text-center p-6 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                            <Posts className="w-10 h-10 mx-auto mb-2 text-blue-500" />
+                            <Ghost className="w-10 h-10 mx-auto mb-2 text-blue-500" />
                             <p className="text-2xl font-bold">42</p>
                             <p className="text-gray-600 dark:text-gray-400">Posts</p>
                         </div>
