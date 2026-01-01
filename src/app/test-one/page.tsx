@@ -1,16 +1,20 @@
 'use client';
 
 import {useState} from 'react';
-import {User, Mail, Ghost, Heart, Moon, Sun, Check, X} from 'lucide-react';
+import {User, Mail, Ghost, Heart, Moon, Sun, Check, X, MapPin, FileText} from 'lucide-react';
 
 export default function TestOne() {
     const [name, setName] = useState('John Doe');
     const [email, setEmail] = useState('john@example.com');
+    const [bio, setBio] = useState('Software developer passionate about creating amazing user experiences.');
+    const [location, setLocation] = useState('San Francisco, CA');
     const [tempName, setTempName] = useState('John Doe');
     const [tempEmail, setTempEmail] = useState('john@example.com');
+    const [tempBio, setTempBio] = useState('Software developer passionate about creating amazing user experiences.');
+    const [tempLocation, setTempLocation] = useState('San Francisco, CA');
     const [isEditing, setIsEditing] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
-    const [errors, setErrors] = useState({name: '', email: ''});
+    const [errors, setErrors] = useState({name: '', email: '', bio: '', location: ''});
 
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,7 +26,7 @@ export default function TestOne() {
     };
 
     const handleSave = () => {
-        const newErrors = {name: '', email: ''};
+        const newErrors = {name: '', email: '', bio: '', location: ''};
 
         if (!validateName(tempName)) {
             newErrors.name = 'Name must be at least 2 characters long and upto 100 chars';
@@ -32,11 +36,21 @@ export default function TestOne() {
             newErrors.email = 'Please enter a valid email address';
         }
 
+        if (tempBio.length > 200) {
+            newErrors.bio = 'Bio must be 200 characters or less';
+        }
+
+        if (tempLocation.length > 50) {
+            newErrors.location = 'Location must be 50 characters or less';
+        }
+
         setErrors(newErrors);
 
-        if (!newErrors.name && !newErrors.email) {
+        if (!newErrors.name && !newErrors.email && !newErrors.bio && !newErrors.location) {
             setName(tempName);
             setEmail(tempEmail);
+            setBio(tempBio);
+            setLocation(tempLocation);
             setIsEditing(false);
         }
     };
@@ -44,13 +58,17 @@ export default function TestOne() {
     const handleCancel = () => {
         setTempName(name);
         setTempEmail(email);
-        setErrors({name: '', email: ''});
+        setTempBio(bio);
+        setTempLocation(location);
+        setErrors({name: '', email: '', bio: '', location: ''});
         setIsEditing(false);
     };
 
     const handleEdit = () => {
         setTempName(name);
         setTempEmail(email);
+        setTempBio(bio);
+        setTempLocation(location);
         setIsEditing(true);
     };
 
@@ -118,14 +136,59 @@ export default function TestOne() {
                                             <p className="text-red-500 text-sm mt-1">{errors.email}</p>
                                         )}
                                     </div>
+                                    <div>
+                                        <label htmlFor="bio-input" className="sr-only">Bio</label>
+                                        <textarea
+                                            id="bio-input"
+                                            value={tempBio}
+                                            onChange={(e) => setTempBio(e.target.value)}
+                                            className={`text-base bg-transparent border-b-2 focus:outline-none transition-colors w-full resize-none ${
+                                                errors.bio
+                                                    ? 'border-red-500'
+                                                    : 'border-blue-500 focus:border-blue-600'
+                                            } ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}
+                                            placeholder="Tell us about yourself"
+                                            rows={2}
+                                        />
+                                        {errors.bio && (
+                                            <p className="text-red-500 text-sm mt-1">{errors.bio}</p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label htmlFor="location-input" className="sr-only">Location</label>
+                                        <input
+                                            id="location-input"
+                                            value={tempLocation}
+                                            onChange={(e) => setTempLocation(e.target.value)}
+                                            className={`text-base bg-transparent border-b-2 focus:outline-none transition-colors w-full ${
+                                                errors.location
+                                                    ? 'border-red-500'
+                                                    : 'border-blue-500 focus:border-blue-600'
+                                            } ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}
+                                            placeholder="Where are you located?"
+                                        />
+                                        {errors.location && (
+                                            <p className="text-red-500 text-sm mt-1">{errors.location}</p>
+                                        )}
+                                    </div>
                                 </div>
                             ) : (
                                 <>
                                     <h2 className="text-2xl sm:text-3xl font-bold mb-2">{name}</h2>
-                                    <p className={`text-lg sm:text-xl flex items-center justify-center sm:justify-start gap-2 ${
+                                    <p className={`text-lg sm:text-xl flex items-center justify-center sm:justify-start gap-2 mb-2 ${
                                         darkMode ? 'text-gray-300' : 'text-gray-600'
                                     }`}>
                                         <Mail className="w-5 h-5"/> {email}
+                                    </p>
+                                    <p className={`text-base flex items-center justify-center sm:justify-start gap-2 mb-2 ${
+                                        darkMode ? 'text-gray-400' : 'text-gray-500'
+                                    }`}>
+                                        <FileText className="w-4 h-4"/> {bio}
+                                    </p>
+                                    <p className={`text-base flex items-center justify-center sm:justify-start gap-2 ${
+                                        darkMode ? 'text-gray-400' : 'text-gray-500'
+                                    }`}>
+                                        <MapPin className="w-4 h-4"/> {location}
                                     </p>
                                 </>
                             )}
