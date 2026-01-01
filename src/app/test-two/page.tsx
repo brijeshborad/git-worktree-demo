@@ -14,6 +14,8 @@ type FilterType = 'all' | 'active' | 'completed';
 type SortType = 'priority' | 'created' | 'alphabetical';
 
 export default function TestTwo() {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
     const [tasks, setTasks] = useState<Task[]>([]);
     const [newTask, setNewTask] = useState('');
     const [priority, setPriority] = useState<'Low' | 'Medium' | 'High'>('Medium');
@@ -96,6 +98,36 @@ export default function TestTwo() {
                         <span>Active: {stats.active}</span>
                         <span>Completed: {stats.completed}</span>
                     </div>
+                </div>
+
+                {/* User Info Form */}
+                <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-4">User Information</h2>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Your name"
+                            className="flex-1 px-4 py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
+                        />
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Your email"
+                            className="flex-1 px-4 py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
+                        />
+                    </div>
+                    {(name || email) && (
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <p className="text-sm text-blue-800">
+                                {name && <span>Name: <strong>{name}</strong></span>}
+                                {name && email && <span className="mx-2">•</span>}
+                                {email && <span>Email: <strong>{email}</strong></span>}
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
