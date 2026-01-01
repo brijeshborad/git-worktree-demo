@@ -176,7 +176,7 @@ export default function TestOne() {
                             }`}>Posts</p>
                         </div>
                         <div
-                            className={`text-center p-4 sm:p-6 rounded-lg transition-all duration-200 hover:scale-105 ${
+                            className={`text-right p-4 sm:p-6 rounded-lg transition-all duration-200 hover:scale-105 ${
                                 darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'
                             }`}>
                             <User className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 text-green-500"/>
@@ -186,7 +186,7 @@ export default function TestOne() {
                             }`}>Followers</p>
                         </div>
                         <div
-                            className={`text-center p-4 sm:p-6 rounded-lg transition-all duration-200 hover:scale-105 ${
+                            className={`text-left p-4 sm:p-6 rounded-lg transition-all duration-200 hover:scale-105 ${
                                 darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'
                             }`}>
                             <Heart className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 text-red-500"/>
